@@ -116,8 +116,6 @@ namespace OverfortGames.FirstPersonController
 
         public JumpSettings jumpSettings;
 
-        public Player player;
-
         [System.Serializable]
         public class JumpSettings
         {
@@ -616,7 +614,7 @@ namespace OverfortGames.FirstPersonController
 
             HandleClimb(dt);
 
-            // HandleGrappling(dt); 
+            HandleGrappling(dt);
 
             HandleWallRun(dt);
 
@@ -636,7 +634,7 @@ namespace OverfortGames.FirstPersonController
 
             HandleMomentum(dt);
 
-            if(!player.isMap && player.playerMode == Player.PlayerMode.Move) ApplyMovement(dt);
+            ApplyMovement(dt);
 
             //Save last used states 
             previousMovement = movement;
@@ -647,7 +645,7 @@ namespace OverfortGames.FirstPersonController
             velocity = characterController.velocity;
 
             //Handle camera rotation - Camera is locked during climb
-            if (currentControllerState != ControllerState.Climb && !player.isMap && player.playerMode == Player.PlayerMode.Move)
+            if (currentControllerState != ControllerState.Climb)
                 cameraController.RotateCamera(cameraHorizontal, cameraVertical, dt);
         }
 
@@ -1349,133 +1347,133 @@ namespace OverfortGames.FirstPersonController
             }
         }
 
-        // private void HandleGrappling(float dt)
-        // {
-        //     //Grappling is not enabled
-        //     if (enableGrapplingHook == false)
-        //         return;
+        private void HandleGrappling(float dt)
+        {
+            //Grappling is not enabled
+            if (enableGrapplingHook == false)
+                return;
 
-        //     //Handle launching the line
-        //     if (IsGrapplingOnCooldown() == false)
-        //     {
-        //         //Get ray from camera direction
-        //         Ray ray = cameraController.GetCamera().ViewportPointToRay(new Vector3(0.5f, 0.5f));
+            //Handle launching the line
+            if (IsGrapplingOnCooldown() == false)
+            {
+                //Get ray from camera direction
+                Ray ray = cameraController.GetCamera().ViewportPointToRay(new Vector3(0.5f, 0.5f));
 
-        //         //The character is in range of hitting something
-        //         if (Physics.Raycast(ray, out var hit, grapplingHookSettings.launchMaxDistance, grapplingHookSettings.hookableObjectLayerMask))
-        //         {
-        //             Crosshair.SetCrosshairColor(grapplingHookSettings.crosshairColor);
+                //The character is in range of hitting something
+                if (Physics.Raycast(ray, out var hit, grapplingHookSettings.launchMaxDistance, grapplingHookSettings.hookableObjectLayerMask))
+                {
+                    Crosshair.SetCrosshairColor(grapplingHookSettings.crosshairColor);
 
-        //             //The player has hit the hook button
-        //             if (characterInput.IsHookButtonDown())
-        //             {
-        //                 GrapplingLineBegin(hit.point);
-        //                 grapplingTarget = hit.collider.transform;
+                    //The player has hit the hook button
+                    if (characterInput.IsHookButtonDown())
+                    {
+                        GrapplingLineBegin(hit.point);
+                        grapplingTarget = hit.collider.transform;
 
-        //                 //Set the relative position from the target hit by the hook (in case the target is a moving platform)
-        //                 grapplingDestinationPointTargetLocalPosition = grapplingTarget.InverseTransformPoint(hit.point);
-        //             }
-        //         }
-        //         else //The character is not in range of hitting something. The rope will be launched anyway but the character will not move
-        //         {
-        //             Crosshair.SetCrosshairToDefaultColor();
+                        //Set the relative position from the target hit by the hook (in case the target is a moving platform)
+                        grapplingDestinationPointTargetLocalPosition = grapplingTarget.InverseTransformPoint(hit.point);
+                    }
+                }
+                else //The character is not in range of hitting something. The rope will be launched anyway but the character will not move
+                {
+                    Crosshair.SetCrosshairToDefaultColor();
 
-        //             //The player has hit the hook button
-        //             if (characterInput.IsHookButtonDown())
-        //             {
-        //                 GrapplingLineBegin(ray.origin + ray.direction * grapplingHookSettings.launchMaxDistance);
-        //                 grapplingTarget = null;
-        //             }
-        //         }
+                    //The player has hit the hook button
+                    if (characterInput.IsHookButtonDown())
+                    {
+                        GrapplingLineBegin(ray.origin + ray.direction * grapplingHookSettings.launchMaxDistance);
+                        grapplingTarget = null;
+                    }
+                }
 
-        //     }
-        //     else //The grappling is on cooldown
-        //     {
-        //         Crosshair.SetCrosshairToDefaultColor();
-        //     }
+            }
+            else //The grappling is on cooldown
+            {
+                Crosshair.SetCrosshairToDefaultColor();
+            }
 
-        //     //Handle line movement
-        //     if (grapplingDestinationPoint != null)
-        //     {
-        //         //If we have a target update the destination point for the line (in case of a moving target)
-        //         if (grapplingTarget != null)
-        //         {
-        //             grapplingDestinationPoint = grapplingTarget.TransformPoint(grapplingDestinationPointTargetLocalPosition);
-        //         }
+            //Handle line movement
+            if (grapplingDestinationPoint != null)
+            {
+                //If we have a target update the destination point for the line (in case of a moving target)
+                if (grapplingTarget != null)
+                {
+                    grapplingDestinationPoint = grapplingTarget.TransformPoint(grapplingDestinationPointTargetLocalPosition);
+                }
 
-        //         OnGrapplingLine();
+                OnGrapplingLine();
 
-        //         //The speed of the line is proportional to the distance from the destination point
-        //         grapplingLaunchTimer += dt * grapplingHookSettings.grapplingLaunchSpeed * (grapplingHookSettings.launchMaxDistance * grapplingHookSettings.launchMaxDistance / grapplingStartDistanceSqr);
-        //         grapplingCurrentPoint = Vector3.Lerp(GetGrapplingLineStartPosition(), grapplingDestinationPoint.Value, grapplingLaunchTimer);
+                //The speed of the line is proportional to the distance from the destination point
+                grapplingLaunchTimer += dt * grapplingHookSettings.grapplingLaunchSpeed * (grapplingHookSettings.launchMaxDistance * grapplingHookSettings.launchMaxDistance / grapplingStartDistanceSqr);
+                grapplingCurrentPoint = Vector3.Lerp(GetGrapplingLineStartPosition(), grapplingDestinationPoint.Value, grapplingLaunchTimer);
 
-        //         //The line has reached the destination point
-        //         if ((grapplingCurrentPoint - grapplingDestinationPoint.Value).sqrMagnitude < 0.1f)
-        //         {
-        //             grapplingDirectionStart = (grapplingCurrentPoint - GetTransformOrigin()).normalized;
+                //The line has reached the destination point
+                if ((grapplingCurrentPoint - grapplingDestinationPoint.Value).sqrMagnitude < 0.1f)
+                {
+                    grapplingDirectionStart = (grapplingCurrentPoint - GetTransformOrigin()).normalized;
 
-        //             //If we have a target start the grappling movement of the character, 
-        //             //the character will be set to Grappling state in the next DetermineControllerState() call
-        //             if (grapplingTarget != null)
-        //             {
-        //                 OnEndGrapplingLine();
-        //                 OnBeginGrappling();
-        //                 isGrappled = true;
-        //             }
-        //             else //We didn't have a target
-        //             {
-        //                 OnEndFailedGrapplingLine();
-        //             }
+                    //If we have a target start the grappling movement of the character, 
+                    //the character will be set to Grappling state in the next DetermineControllerState() call
+                    if (grapplingTarget != null)
+                    {
+                        OnEndGrapplingLine();
+                        OnBeginGrappling();
+                        isGrappled = true;
+                    }
+                    else //We didn't have a target
+                    {
+                        OnEndFailedGrapplingLine();
+                    }
 
-        //             grapplingDestinationPoint = null;
-        //             grapplingLaunchTimer = 0;
-        //         }
-        //     }
+                    grapplingDestinationPoint = null;
+                    grapplingLaunchTimer = 0;
+                }
+            }
 
-        //     //Handle grappled character movement
+            //Handle grappled character movement
 
-        //     if (isGrappled == false) //We are not grappled yet
-        //     {
-        //         grapplingCurrentDetachTimer = 0;
-        //         grapplingCurrentTimer = 0;
-        //         return;
-        //     }
+            if (isGrappled == false) //We are not grappled yet
+            {
+                grapplingCurrentDetachTimer = 0;
+                grapplingCurrentTimer = 0;
+                return;
+            }
 
-        //     //Update the destination to follow the target (in case of a moving platform)
-        //     if (grapplingTarget != null)
-        //     {
-        //         grapplingCurrentPoint = grapplingTarget.TransformPoint(grapplingDestinationPointTargetLocalPosition);
-        //     }
+            //Update the destination to follow the target (in case of a moving platform)
+            if (grapplingTarget != null)
+            {
+                grapplingCurrentPoint = grapplingTarget.TransformPoint(grapplingDestinationPointTargetLocalPosition);
+            }
 
-        //     grapplingDirection = (grapplingCurrentPoint - GetTransformOrigin()).normalized;
-        //     grapplingCurrentDistance = Vector3.Distance(grapplingCurrentPoint, tr.position);
-        //     grapplingCurrentTimer += dt;
+            grapplingDirection = (grapplingCurrentPoint - GetTransformOrigin()).normalized;
+            grapplingCurrentDistance = Vector3.Distance(grapplingCurrentPoint, tr.position);
+            grapplingCurrentTimer += dt;
 
-        //     OnGrappling();
+            OnGrappling();
 
-        //     //If the current distance is below the threshold or the speed of the character exceed the limit, detach the character 
-        //     if (grapplingCurrentDistance <= grapplingHookSettings.detachMinDistanceCondition 
-        //         || GetCurrentSpeedSqr() > grapplingHookSettings.detachSpeedLimitCondition * grapplingHookSettings.detachSpeedLimitCondition 
-        //         || momentum.sqrMagnitude > grapplingHookSettings.detachSpeedLimitCondition * grapplingHookSettings.detachSpeedLimitCondition)
-        //     {
-        //         OnEndGrappling();
-        //         isGrappled = false;
-        //         grapplingDestinationPoint = null;
-        //     }
+            //If the current distance is below the threshold or the speed of the character exceed the limit, detach the character 
+            if (grapplingCurrentDistance <= grapplingHookSettings.detachMinDistanceCondition 
+                || GetCurrentSpeedSqr() > grapplingHookSettings.detachSpeedLimitCondition * grapplingHookSettings.detachSpeedLimitCondition 
+                || momentum.sqrMagnitude > grapplingHookSettings.detachSpeedLimitCondition * grapplingHookSettings.detachSpeedLimitCondition)
+            {
+                OnEndGrappling();
+                isGrappled = false;
+                grapplingDestinationPoint = null;
+            }
 
 
-        //     //If the character is spinning around an object (the angle from the attach position > 90) and the timer exceed the time limit, detach the character
-        //     if (Vector3.Angle(grapplingDirection, grapplingDirectionStart) > grapplingHookSettings.detachAngleCondition)
-        //     {
-        //         grapplingCurrentDetachTimer += dt;
-        //         if (grapplingCurrentDetachTimer > grapplingHookSettings.detachTimerCondition)
-        //         {
-        //             OnEndGrappling();
-        //             isGrappled = false;
-        //             grapplingDestinationPoint = null;
-        //         }
-        //     }
-        // }
+            //If the character is spinning around an object (the angle from the attach position > 90) and the timer exceed the time limit, detach the character
+            if (Vector3.Angle(grapplingDirection, grapplingDirectionStart) > grapplingHookSettings.detachAngleCondition)
+            {
+                grapplingCurrentDetachTimer += dt;
+                if (grapplingCurrentDetachTimer > grapplingHookSettings.detachTimerCondition)
+                {
+                    OnEndGrappling();
+                    isGrappled = false;
+                    grapplingDestinationPoint = null;
+                }
+            }
+        }
 
         private void HandleWallRun(float dt)
         {

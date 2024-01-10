@@ -25,11 +25,11 @@ namespace OverfortGames.FirstPersonController
 		[SerializeField]
 		private string runInputKey = "Run";
 
-		// [SerializeField]
-		// private string proneInputKey = "Prone";
+		[SerializeField]
+		private string proneInputKey = "Prone";
 
-		// [SerializeField]
-		// private string hookInputKey = "Hook";
+		[SerializeField]
+		private string hookInputKey = "Hook";
 
 		[SerializeField]
 		private string leanLeftKey = "LeanLeft";
@@ -49,8 +49,8 @@ namespace OverfortGames.FirstPersonController
 		private bool isJumpButtonReleased;
 		private bool isJumpButtonDown;
 		private bool isSlideButtonBeingPressed;
-		// private bool isProneButtonBeingPressed;
-		// private bool isProneButtonPressedDown;
+		private bool isProneButtonBeingPressed;
+		private bool isProneButtonPressedDown;
 		private bool isHookButtonDown;
 		private bool isRunButtonPressedDown;
 		private bool isRunButtonDoublePressedDown;
@@ -87,10 +87,10 @@ namespace OverfortGames.FirstPersonController
 
 			isSlideButtonBeingPressed = Input.GetButton(slideInputKey);
 
-			// isProneButtonBeingPressed = Input.GetButton(proneInputKey);
-			// isProneButtonPressedDown = Input.GetButtonDown(proneInputKey);
+			isProneButtonBeingPressed = Input.GetButton(proneInputKey);
+			isProneButtonPressedDown = Input.GetButtonDown(proneInputKey);
 
-			// isHookButtonDown = Input.GetButtonDown(hookInputKey);
+			isHookButtonDown = Input.GetButtonDown(hookInputKey);
 
 			isLeanLeftButtonBeingPressed = Input.GetButton(leanLeftKey);
 			isLeanRightButtonBeingPressed = Input.GetButton(leanRightKey);
@@ -182,10 +182,10 @@ namespace OverfortGames.FirstPersonController
 			return isLeanRightButtonBeingPressed;
 		}
 
-		// public bool IsHookButtonDown()
-		// {
-		// 	return isHookButtonDown;
-		// }
+		public bool IsHookButtonDown()
+		{
+			return isHookButtonDown;
+		}
 
 		#endregion
 	}
