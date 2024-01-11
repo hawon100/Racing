@@ -125,7 +125,7 @@ namespace OverfortGames.FirstPersonController
             public int jumpsCount = 1;
 
             public float jumpForce = 10;
-            
+
             [Header("Advanced")]
             [Tooltip("Maximum jump button press duration for the adaptive jump")]
             public float adaptiveJumpDuration = 0;
@@ -294,7 +294,7 @@ namespace OverfortGames.FirstPersonController
             public float detachSpeedLimitCondition = 27;
 
             [Tooltip("To extend this angle condition use 'detachTimerCondition'")]
-            [Range(0,90)]
+            [Range(0, 90)]
             public float detachAngleCondition = 90;
 
             [Tooltip("This timer starts when the angle from the attach position > 'detachAngleCondition'. This can be useful in order to make the character rotate around objects while grappled")]
@@ -576,7 +576,7 @@ namespace OverfortGames.FirstPersonController
             isRunButtonDoublePressedDown = characterInput.IsRunButtonDoublePressedDown();
             // isProneButtonBeingPressed = characterInput.IsProneButtonBeingPressed();
             // isProneButtonPressedDown = characterInput.IsProneButtonPressedDown();
-            isRunning = characterInput.IsRunButtonBeingPressed();
+            isRunning = characterInput.IsRunButtonBeingPressed() && GameManager.instance.curStamina > 0;
             isSliding = characterInput.IsSlideButtonBeingPressed();
             cameraHorizontal = cameraInput.GetHorizontal();
             cameraVertical = cameraInput.GetVertical();
@@ -1452,8 +1452,8 @@ namespace OverfortGames.FirstPersonController
             OnGrappling();
 
             //If the current distance is below the threshold or the speed of the character exceed the limit, detach the character 
-            if (grapplingCurrentDistance <= grapplingHookSettings.detachMinDistanceCondition 
-                || GetCurrentSpeedSqr() > grapplingHookSettings.detachSpeedLimitCondition * grapplingHookSettings.detachSpeedLimitCondition 
+            if (grapplingCurrentDistance <= grapplingHookSettings.detachMinDistanceCondition
+                || GetCurrentSpeedSqr() > grapplingHookSettings.detachSpeedLimitCondition * grapplingHookSettings.detachSpeedLimitCondition
                 || momentum.sqrMagnitude > grapplingHookSettings.detachSpeedLimitCondition * grapplingHookSettings.detachSpeedLimitCondition)
             {
                 OnEndGrappling();
@@ -1651,6 +1651,7 @@ namespace OverfortGames.FirstPersonController
                             if (runSettings.canRunWhileStrafing && vertical > 0)
                             {
                                 speedMultiplier = runSettings.runSpeed;
+                                
                             }
                             else
                             {
@@ -2281,10 +2282,10 @@ namespace OverfortGames.FirstPersonController
                     //It must face a wall-like obstacle
                     if (CalculateSlope(climbDetectionRayHit.normal) > 80)
                     {
-                        int wallCheckSegmentsMaxIterations= 5;
+                        int wallCheckSegmentsMaxIterations = 5;
                         for (int i = 0; i < wallCheckSegmentsMaxIterations; i++)
                         {
-                            Ray wallCheckSegmentRay = new Ray(GetColliderBasePosition() + Vector3.up * (characterController.stepOffset + 0.01f + climbSettings.maxHeight * i/ wallCheckSegmentsMaxIterations), bodyTransform.forward);
+                            Ray wallCheckSegmentRay = new Ray(GetColliderBasePosition() + Vector3.up * (characterController.stepOffset + 0.01f + climbSettings.maxHeight * i / wallCheckSegmentsMaxIterations), bodyTransform.forward);
 
                             float wallCheckSegmentRayMaxDistance = climbSettings.maxDistanceFromClimbableObject + 0.01f + characterController.radius;
 
@@ -2297,8 +2298,8 @@ namespace OverfortGames.FirstPersonController
 
                                 for (int k = 1; k <= ledgeCheckSegmentsMaxIterations; k++)
                                 {
-                                    Ray ledgeDetectionRay = new Ray(wallCheckSegmentRay.origin + wallCheckSegmentRay.direction * wallCheckSegmentRayMaxDistance * k/ledgeCheckSegmentsMaxIterations, Vector3.down);
-                                   // Debug.Break();
+                                    Ray ledgeDetectionRay = new Ray(wallCheckSegmentRay.origin + wallCheckSegmentRay.direction * wallCheckSegmentRayMaxDistance * k / ledgeCheckSegmentsMaxIterations, Vector3.down);
+                                    // Debug.Break();
                                     Debug.DrawRay(ledgeDetectionRay.origin, ledgeDetectionRay.direction, Color.cyan);
 
                                     //Get the destination point and begin climbing
@@ -2336,12 +2337,12 @@ namespace OverfortGames.FirstPersonController
 
                                 }
 
-                               
+
                             }
 
                         }
 
-                        
+
                     }
                 }
             }
@@ -2528,7 +2529,7 @@ namespace OverfortGames.FirstPersonController
         public bool IsTryingToJumpThisFrame()
         {
             return isTryingToJump;
-        }    
+        }
 
         //Utility
 

@@ -240,6 +240,7 @@ namespace OverfortGames.FirstPersonController
 		//Get input and handle camera rotation
 		public void InputHandleRotation()
 		{
+			if(!GameManager.instance.isGame) return;
 			//Get input
 			float horizontal = cameraInput.GetHorizontal();
 			float vertical = cameraInput.GetVertical();

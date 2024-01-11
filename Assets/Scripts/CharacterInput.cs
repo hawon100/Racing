@@ -67,7 +67,7 @@ namespace OverfortGames.FirstPersonController
 		private void Update()
 		{
 			//Force positive and negative input values respectively to 1 and -1
-			if (useRawInput)
+			if (useRawInput && GameManager.instance.isGame)
 			{
 				horizontalInput = Input.GetAxisRaw(horizontalInputKey);
 				verticalInput = Input.GetAxisRaw(verticalInputKey);
