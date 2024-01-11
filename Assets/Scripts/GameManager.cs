@@ -5,12 +5,14 @@ using UnityEngine.UI;
 using DG.Tweening;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using OverfortGames.FirstPersonController;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance { get; private set; }
     public bool isGame;
     public Transform player;
+    [SerializeField] FirstPersonController controller;
     public Transform cam;
     public VolumeProfile volume;
     private Vignette vignette;
@@ -19,6 +21,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] Image fadeImage;
     [SerializeField] Image staminaSlider;
     [SerializeField] Text aliveTime;
+    [SerializeField] AudioSource Breath;
 
     [SerializeField] Image[] hand = new Image[2];
     float curtimeSec;
@@ -35,10 +38,12 @@ public class GameManager : MonoBehaviour
     {
         curStamina = Stamina;
         StartCoroutine(StartGame());
+        vignette.intensity.Override(0.3f);
+        vignette.color.Override(new Color(0, 0, 0, 1));
     }
     private void Update()
     {
-        if(isGame) curtimeSec += Time.deltaTime;
+        if (isGame) curtimeSec += Time.deltaTime;
         if (curtimeSec >= 60)
         {
             curtimeMin++;
@@ -48,30 +53,44 @@ public class GameManager : MonoBehaviour
 
         staminaSlider.fillAmount = curStamina / Stamina;
         bool isRun = Input.GetKey(KeyCode.LeftShift);
-        if(isRun) curHandMoveTime += Time.deltaTime;
-        else { curHandMoveTime = 0; curBeforeHandTime = 0;}
-        if(Mathf.Abs(curHandMoveTime - curBeforeHandTime) >= 0.5f)
+        var horizontal = Input.GetAxisRaw("Horizontal");
+        var vertical = Input.GetAxisRaw("Vertical");
+        bool isWalk = horizontal > 0 || vertical > 0;
+        bool doubleRun = controller.characterInput.IsdoubleRunning();
+        if (isWalk)
         {
-            curBeforeHandTime = curHandMoveTime;
-            StartCoroutine(HandMove((int)(curHandMoveTime/0.5f) % 2));
+            if (isRun || doubleRun)
+            {
+                curHandMoveTime += Time.deltaTime;
+            } 
+                
+            else
+            {
+                curHandMoveTime += Time.deltaTime / 2;
+            }
         }
 
+        if (Mathf.Abs(curHandMoveTime - curBeforeHandTime) >= 0.5f)
+        {
+            curBeforeHandTime = curHandMoveTime;
+            StartCoroutine(HandMove((int)(curHandMoveTime / 0.5f) % 2));
+        }
         curStamina += (isRun ? -10 : 4) * Time.deltaTime;
         StaminaMaxUpdate();
     }
     IEnumerator HandMove(int index)
     {
         float x = index == 1 ? 1 : -1;
-        yield return hand[index].rectTransform.DOAnchorPos(new Vector2(x * 300,-150),0.3f).WaitForCompletion();
-        yield return hand[index].rectTransform.DOAnchorPos(new Vector2(x * 1098,-525),0.3f).WaitForCompletion();
+        yield return hand[index].rectTransform.DOAnchorPos(new Vector2(x * 300, -150), 0.3f).WaitForCompletion();
+        yield return hand[index].rectTransform.DOAnchorPos(new Vector2(x * 1098, -525), 0.3f).WaitForCompletion();
     }
     public void WarningMark(float distance)
     {
-        var lerpValue = Mathf.InverseLerp(0,15,distance);
-        var colorR = Mathf.Lerp(1,0,lerpValue);
-        var intensity = Mathf.Lerp(1,0.3f,lerpValue);
+        var lerpValue = Mathf.InverseLerp(0, 15, distance);
+        var colorR = Mathf.Lerp(1, 0, lerpValue);
+        var intensity = Mathf.Lerp(1, 0.3f, lerpValue);
         vignette.intensity.Override(intensity);
-        vignette.color.Override(new Color(colorR,0,0,1));
+        vignette.color.Override(new Color(colorR, 0, 0, 1));
     }
     public void StaminaMaxUpdate()
     {
@@ -92,7 +111,7 @@ public class GameManager : MonoBehaviour
     {
         yield return fadeImage.DOColor(new Color(0, 0, 0, 1), 1).WaitForCompletion();
         yield return new WaitForSeconds(0.5f);
-        aliveTime.rectTransform.DOAnchorPos(Vector3.zero,1).WaitForCompletion();
-        yield return aliveTime.rectTransform.DOScale(Vector3.one * 4,1).WaitForCompletion();
+        aliveTime.rectTransform.DOAnchorPos(Vector3.zero, 1).WaitForCompletion();
+        yield return aliveTime.rectTransform.DOScale(Vector3.one * 4, 1).WaitForCompletion();
     }
 }

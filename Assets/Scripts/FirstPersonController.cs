@@ -567,6 +567,7 @@ namespace OverfortGames.FirstPersonController
 
         private void Update()
         {
+            var g = GameManager.instance;
             //Gather inputs data
             horizontal = characterInput.GetHorizontalMovementInput();
             vertical = characterInput.GetVerticalMovementInput();
@@ -576,7 +577,7 @@ namespace OverfortGames.FirstPersonController
             isRunButtonDoublePressedDown = characterInput.IsRunButtonDoublePressedDown();
             // isProneButtonBeingPressed = characterInput.IsProneButtonBeingPressed();
             // isProneButtonPressedDown = characterInput.IsProneButtonPressedDown();
-            isRunning = characterInput.IsRunButtonBeingPressed() && GameManager.instance.curStamina > 0;
+            isRunning = characterInput.IsRunButtonBeingPressed() && g.curStamina > 0;
             isSliding = characterInput.IsSlideButtonBeingPressed();
             cameraHorizontal = cameraInput.GetHorizontal();
             cameraVertical = cameraInput.GetVertical();

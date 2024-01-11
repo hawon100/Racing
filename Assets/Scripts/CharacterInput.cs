@@ -66,6 +66,7 @@ namespace OverfortGames.FirstPersonController
 		#region Methods
 		private void Update()
 		{
+			var g = GameManager.instance;
 			//Force positive and negative input values respectively to 1 and -1
 			if (useRawInput && GameManager.instance.isGame)
 			{
@@ -99,13 +100,18 @@ namespace OverfortGames.FirstPersonController
 
 			if (isRunButtonPressedDown)
 			{
-				if (lastTimeRunButtonBeingPressed + minimumTimerForDoublePress > Time.time)
+				if (IsdoubleRunning() && g.curStamina >= g.Stamina / 2)
 				{
 					isRunButtonDoublePressedDown = true;
+					g.curStamina -= g.Stamina / 2;
 				}
 
 				lastTimeRunButtonBeingPressed = Time.time;
 			}
+		}
+		public bool IsdoubleRunning()
+		{
+			return lastTimeRunButtonBeingPressed + minimumTimerForDoublePress > Time.time;
 		}
 
 		private void LateUpdate()
